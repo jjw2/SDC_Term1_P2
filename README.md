@@ -16,20 +16,6 @@ Instructions for the project can be found [here](https://github.com/udacity/CarN
 
 The rubric for the project can be found [here](https://review.udacity.com/#!/rubrics/481/view)
 
-[//]: # (Image References)
-
-[image1]: ./md_imgs/hist1.png "Hist1"
-[image2]: ./md_imgs/raw_imgs.png "Raw Images"
-[image3]: ./md_imgs/unwarped.png "Unwarped"
-[image4]: ./md_imgs/warp_example.png "Image Supplementation"
-[image5]: ./md_imgs/hist2.png "Hist2"
-[image6]: ./md_imgs/proc_imgs.png "Processed Images"
-[image7]: ./md_imgs/test_imgs.png "Test Images"
-[image8]: ./md_imgs/top5.png "Top 5"
-[image9]: ./md_imgs/double_curve.png "Double Curve"
-
-
-
 ## Data Set Summary & Exploration
 
 ### 1. Provide a basic summary of the data set.
@@ -48,10 +34,14 @@ The distribution of data across classes for the training set is show below.
 
 ![alt text][image1]
 
+As you can see, there is a significant disparity in the number of images across classes. This hints at the need for supplementation of images across classes to narrow down this gap, otherwise, the model may be biased towards the signs with the most samples. Obviously, some signs are more rare than others, but in the case of driving, it wouldn't be acceptable to simply fail on rare signs; the classifier should ideally classifly all signs correctly.
+
 
 Below is a sampling of images from the training set.
 
 ![alt text][image2]
+
+The most noticeable aspect of the images here is that they vary greatly in luminosity. This is to be expected, as self-driving cars can't be expected to only operate in the day time. This hints at the need for some sort of luminosity correction in the image processing pipeline.
 
 ## Design and Test a Model Architecture
 
@@ -119,8 +109,12 @@ The classifier is based on LeNet with adjustments made to account for increased 
 
 To train the model, I used the Adam Optimizer used in the Udacity classroom sessions. I experimented with various parameters, but settled on the following:
 
-- **Epochs** - 10
-    - Generally, the network appeared to plateau in accuracy within the first 5-7 epochs, and would fluctuate afterwards. I kept the number of epochs at 10 to avoid overtraining.
+- **Epochs** - 6
+    - Generally, the network appeared to plateau in accuracy within the first 5-7 epochs - as shown in the learning curve below - and would fluctuate afterwards. I tried to vary the amounts of dropout in the network to cause training and validation accuracy converge (i.e.: preven overfitting), but this was about as close as I could get. Based on the curve below, I kept the number of epochs at 6 to prevent overtraining.
+
+![alt text][image10]
+
+Note that the learning curve shown in the jupyter notebook contains fewer epochs; the above curve was generated first to determine the number of epochs to run.
 
 - **Batch Size** - 128
     - I didn't experiment much with this.
@@ -131,8 +125,8 @@ To train the model, I used the Adam Optimizer used in the Udacity classroom sess
 - **Matrix Initialization** - Mean - 0.0, Std Dev - 0.1
     - Standard deviation of random matrices seemed to dramatically affect the rates of convergence across epochs. I tested standard deviations of several orders of magnitude; lower standard deviations (ex: 0.01) tended to result in slow convergence to slightly lower levels of accuracy (ex: 95%), whereas higher standard deviations (ex: 0.5) would typically result in very poor accuracy. I'm assuming that the larger standard deviation created an "opinionated" network upon initialization.
 
-**Dropout** - First fully connected layer only - 50%
-- I experimented with various levels of dropout at diffenet layers in the architecture. I provided the ability to apply different levels of dropout across the layers, but ultimately, I included dropout only in the first fully connected layer. Including high rates of dropout in the convoluational layers or smaller connected layers tended to decrease accuracy, while lower levels of dropout (ex: 90% keep rate) didn't seem to significantly affect accuracy. Intuitively, this makes sense: high levels or dropout in areas of the network where the number of parameters is small (such as the convolutional layers) means that you're "throwing out" too much information. In the future, if I had more processing power, I might try to add more convolutional depth (ex: 108 features, as suggested by [Sermanet & LeCun](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf)) and increase dropout levels.
+- **Dropout**
+  - I experimented with various levels of dropout at different layers in the architecture. I provided the ability to apply different levels of dropout across the layers, but ultimately, I included dropout only in larger layers, with convolutional layers having less dropout than connected layers. Including high rates of dropout in the convoluational layers or smaller connected layers tended to decrease accuracy. Intuitively, this makes sense: high levels or dropout in areas of the network where the number of parameters is small (such as the later convolutional layers) means that you're "throwing out" too much information. In the future, if I had more processing power, I might try to add more convolutional depth (ex: 108 features, as suggested by [Sermanet & LeCun](http://yann.lecun.com/exdb/publis/pdf/sermanet-ijcnn-11.pdf)) and increase dropout levels.
 
 
 ### 4. Describe the approach taken for finding a solution and getting the validation set accuracy to be at least 0.93. Include in the discussion the results on the training, validation and test sets and where in the code these were calculated. Your approach may have been an iterative process, in which case, outline the steps you took to get to the final solution and why you chose those steps. Perhaps your solution involved an already well known implementation or architecture. In this case, discuss why you think the architecture is suitable for the current problem.
@@ -164,7 +158,7 @@ I chose 3 images of the same shape (triangle with red border) to test how well t
 
 ### 2. Discuss the model's predictions on these new traffic signs and compare the results to predicting on the test set. At a minimum, discuss what the predictions were, the accuracy on these new predictions, and compare the accuracy to the accuracy on the test set.
 
-Answers to 2 and 3 combineed below.
+Answers to 2 and 3 combined below.
 
 ### 3. Describe how certain the model is when predicting on each of the five new images by looking at the softmax probabilities for each prediction. Provide the top 5 softmax probabilities for each image along with the sign type of each probability.
 
@@ -196,3 +190,17 @@ The classifier correctly predicted this sign, with a probability of 99.9999%. In
 
 **No Passing**
 The classifier correctly predicted this sign, with a probability approaching 100%
+
+
+[//]: # (Image References)
+
+[image1]: ./md_imgs/hist1.png "Hist1"
+[image2]: ./md_imgs/raw_imgs.png "Raw Images"
+[image3]: ./md_imgs/unwarped.png "Unwarped"
+[image4]: ./md_imgs/warp_example.png "Image Supplementation"
+[image5]: ./md_imgs/hist2.png "Hist2"
+[image6]: ./md_imgs/proc_imgs.png "Processed Images"
+[image7]: ./md_imgs/test_imgs.png "Test Images"
+[image8]: ./md_imgs/top5.png "Top 5"
+[image9]: ./md_imgs/double_curve.png "Double Curve"
+[image10]: ./md_imgs/learning_curve.png "Double Curve"
